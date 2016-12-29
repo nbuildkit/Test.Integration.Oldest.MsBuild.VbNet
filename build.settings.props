@@ -310,6 +310,18 @@
             </Groups>
         </BuildStepsToExecute>
 
+        <!--
+        <BuildStepsToExecute Include="$(BuildStepsBuildILMerge)">
+            <Properties>
+                Configuration=$(ProductionConfiguration);
+                Platform=$(Platform)
+            </Properties>
+            <Groups>
+                Package;
+            </Groups>
+        </BuildStepsToExecute>
+        -->
+
         <BuildStepsToExecute Include="$(BuildStepsPackNuGet)">
             <Properties>
                 Configuration=$(ProductionConfiguration);
