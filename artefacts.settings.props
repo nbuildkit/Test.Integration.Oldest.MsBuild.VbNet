@@ -43,7 +43,7 @@
         <!--
             The full path to the file that is used to store the version information during the build.
         -->
-        <!-- <FileSemanticVersion Condition=" '$(FileSemanticVersion)' == '' ">$(DirBuildTemp)\semantic_version.json</FileSemanticVersion> -->
+        <!-- <FileSemanticVersion>$(DirBuildTemp)\semantic_version.json</FileSemanticVersion> -->
     </PropertyGroup>
 
 
@@ -55,7 +55,7 @@
         <!-- <FileIssueIds Condition=" '$(FileIssueIds)' == '' ">$(DirBuildTemp)\issue_ids.json</FileIssueIds> -->
 
         <!-- The full path to the text file that is used to store the release notes for the current release during the build. -->
-        <!-- <FileReleaseNotes Condition=" '$(FileReleaseNotes)' == '' ">$(DirBuildTemp)\releasenotes.txt</FileReleaseNotes> -->
+        <!-- <FileReleaseNotes>$(DirBuildTemp)\releasenotes.txt</FileReleaseNotes> -->
     </PropertyGroup>
 
 
@@ -64,7 +64,7 @@
     -->
     <PropertyGroup>
         <!-- The full path to the file that contains the information about the current VCS workspace. -->
-        <!-- <FileVcsInfo Condition=" '$(FileVcsInfo)' == '' ">$(DirBuildTemp)\vcs.info.json</FileVcsInfo> -->
+        <!-- <FileVcsInfo>$(DirBuildTemp)\vcs.info.json</FileVcsInfo> -->
     </PropertyGroup>
 
 
