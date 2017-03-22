@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="11.0"
-         DefaultTargets="Run"
-         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project
+    DefaultTargets="Run"
+    ToolsVersion="14.0"
+    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!-- Overrides for the build configuration -->
     <PropertyGroup>
         <!-- A flag that indicates whether or not the build output of the VS projects is redirected to the $(DirBuildBinPlatformConfig) directory. -->
@@ -144,7 +145,8 @@
                                                            currently allows gathering release notes from GitHub, Jira and YouTrack
         $(BuildStepsPrepareRestoreNpm)                   - Restores all the NPM packages for the project.
         $(BuildStepsPrepareRestoreBower)                 - Restores all the Bower packages for the project.
-        $(BuildStepsPrepareCopyFiles)                    - Copies one or more files from the file system or from a NuGet package.
+        $(BuildStepsPrepareCopyNuGet)                    - Copies one or more files from a NuGet package.
+        $(BuildStepsPrepareCopyFiles)                    - Copies one or more files from the file system.
         $(BuildStepsPrepareAssemblyInfo)                 - Updates all existing AssemblyInfo.cs and AssemblyInfo.vb files with the version numbers, company information,
                                                            copyright information and optionally build time and build information.
         $(BuildStepsPrepareGenerateFiles)                - Generates one or more files from a set of template files.
@@ -162,15 +164,7 @@
         for that step, e.g. adding a build step that points to the 'c:\stuff\MyCoolScript.msbuild' will execute
         that script.
 
-        Each script has the following properties passed to it:
-        $(ShouldDisplayDebugLog)                         - A flag indicating whether or not to display debug log information, usually at the start of the script execution.
-        $(NBuildKitVersion)                              - The full version of the nBuildKit library that is executing the build.
-        $(DirNBuildKitMsBuild)                           - The full path to the directory that contains the nBuildKit scripts.
-        $(DirNBuildKitMsBuildShared)                     - The full path to the directory that contains the shared nBuildkit scripts.
-        $(DirNBuildKitMsBuildExtensions)                 - The full path to the directory that contains the nBuildKit extension scripts.
-        $(DirNBuildKitMsBuildTemplates)                  - The full path to the directory that contains the nBuildKit templates.
-
-        Additionally any properties defined by the 'Properties' section are also pushed up.
+        Any properties defined by the 'Properties' section are pushed up.
 
         Custom build steps may chose to add metadata to the 'AvailableStepMetadata' ItemGroup. This ItemGroup contains metadata describing
         all known steps.
@@ -303,8 +297,9 @@
             </PostSteps>
         </BuildStepsToExecute>
         <!--
-        <BuildStepsToExecute Include="$(BuildStepsPrepareTagVcs)"
-                             Condition=" '$(IsGitFlow)' == 'true' AND ('$(IsReleaseBranch)' == 'true' OR '$(IsHotfixBranch)' == 'true') ">
+        <BuildStepsToExecute
+            Condition=" '$(IsGitFlow)' == 'true' AND ('$(IsReleaseBranch)' == 'true' OR '$(IsHotfixBranch)' == 'true') "
+            Include="$(BuildStepsPrepareTagVcs)">
             <Properties>
             </Properties>
             <Groups>
@@ -360,6 +355,18 @@
         </BuildStepsToExecute>
         -->
 
+        <BuildStepsToExecute Include="$(BuildStepsPrepareCopyNuGet)">
+            <Properties>
+            </Properties>
+            <Groups>
+                CopyFiles;
+                Prepare;
+            </Groups>
+            <PreSteps>
+            </PreSteps>
+            <PostSteps>
+            </PostSteps>
+        </BuildStepsToExecute>
         <BuildStepsToExecute Include="$(BuildStepsPrepareCopyFiles)">
             <Properties>
             </Properties>
@@ -542,15 +549,7 @@
         for that step, e.g. adding a build step that points to the 'c:\stuff\MyCoolScript.msbuild' will execute
         that script.
 
-        Each script has the following properties passed to it:
-        $(ShouldDisplayDebugLog)         - A flag indicating whether or not to display debug log information, usually at the start of the script execution.
-        $(NBuildKitVersion)              - The full version of the nBuildKit library that is executing the build.
-        $(DirNBuildKitMsBuild)           - The full path to the directory that contains the nBuildKit scripts.
-        $(DirNBuildKitMsBuildShared)     - The full path to the directory that contains the shared nBuildkit scripts.
-        $(DirNBuildKitMsBuildExtensions) - The full path to the directory that contains the nBuildKit extension scripts.
-        $(DirNBuildKitMsBuildTemplates)  - The full path to the directory that contains the nBuildKit templates.
-
-        Additionally any properties defined by the 'Properties' section are also pushed up.
+        Any properties defined by the 'Properties' section are pushed up.
     -->
     <ItemGroup>
         <!--
@@ -592,7 +591,7 @@
     -->
     <ItemGroup>
         <!--
-        <BuildFilesToDelete Include="" />
+        <FilesToDelete Include="" />
         -->
     </ItemGroup>
 
@@ -604,7 +603,7 @@
     -->
     <ItemGroup>
         <!--
-        <BuildDirectoriesToDelete Include="" />
+        <DirectoriesToDelete Include="" />
         -->
     </ItemGroup>
 
@@ -618,7 +617,7 @@
     <ItemGroup Condition=" '@(FilesToCopy)' == '' ">
         <!--
         <FilesToCopy Include="">
-            <Destinations></Destinations>
+            <Destination></Destination>
         </FilesToCopy>
         -->
     </ItemGroup>
@@ -642,8 +641,12 @@
     -->
     <ItemGroup Condition=" '@(AssemblyInfoFilesToUpdate)' == '' ">
         <!--
-        <AssemblyInfoFilesToUpdate Include="$(DirSrc)\**\AssemblyInfo.cs" />
-        <AssemblyInfoFilesToUpdate Include="$(DirSrc)\**\AssemblyInfo.vb" />
+        <AssemblyInfoFilesToUpdate
+            Condition=" '$(DirSrc)' != '' "
+            Include="$(DirSrc)\**\AssemblyInfo.cs" />
+        <AssemblyInfoFilesToUpdate
+            Condition=" '$(DirSrc)' != '' "
+            Include="$(DirSrc)\**\AssemblyInfo.vb" />
         -->
     </ItemGroup>
 
@@ -666,7 +669,9 @@
     -->
     <ItemGroup>
         <!--
-        <BuildFilesToGenerate Include="$(DirBuildTemp)\MyFile.txt">
+        <BuildFilesToGenerate
+            Condition=" '$(DirBuildTemp)' != '' "
+            Include="$(DirBuildTemp)\MyFile.txt">
             <Encoding>UTF-8</Encoding>
             <Expression>(MyRegex)</Expression>
             <ReplacementValue>MyAdditionalTemplateValue</ReplacementValue>
@@ -827,7 +832,9 @@
             The ItemGroup items that define which files contain the unit test cases. Paths can include build templates,
             e.g. $(DirBuildBinPlatformConfig)\${VersionMajor}.0\**\test*.dll
         -->
-        <UnitTestAssemblies Include="$(DirBuildBinPlatformConfig)\**\$(UnitTestAssemblyNamePrefix)*.dll" />
+        <UnitTestAssemblies
+            Condition=" '$(DirBuildBinPlatformConfig)' != '' "
+            Include="$(DirBuildBinPlatformConfig)\**\$(UnitTestAssemblyNamePrefix)*.dll" />
     </ItemGroup>
     <ItemGroup>
         <!--
@@ -858,8 +865,9 @@
         -->
         <!--
         <XmlFilesToValidate
-            Include="$(DirSrc)\**\*.xml"
-            Exclude="$(DirSrc)\**\ignore.xml">
+            Condition=" '$(DirSrc)' != '' "
+            Exclude="$(DirSrc)\**\ignore.xml"
+            Include="$(DirSrc)\**\*.xml">
             <SchemaFile></SchemaFile>
             <TargetNamespace></TargetNamespace>
         </XmlFilesToValidate>
@@ -897,18 +905,27 @@
         <!--
             The locations of the files that should be analyzed by FxCop.
         -->
-        <FxCopFiles Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.*.dll"
-                    Exclude="$(DirBuildBinPlatformConfig)\Test.*.dll;$(DirBuildBinPlatformConfig)\nBuildKit.Test.VbNet.Library.dll">
-            <TargetFramework>4.5</TargetFramework>
+        <FxCopFiles
+            Condition=" '$(DirBuildBinPlatformConfig)' != '' "
+            Exclude="$(DirBuildBinPlatformConfig)\Test.*.dll;$(DirBuildBinPlatformConfig)\nBuildKit.Test.VbNet.Library.dll"
+            Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.*.dll">
+            <CustomDictionary>$(FxCopCustomDictionary)</CustomDictionary>
             <RuleSet>$(DirSrc)\codeanalysis.base.ruleset</RuleSet>
-        </FxCopFiles>
-        <FxCopFiles Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.*.exe">
             <TargetFramework>4.5</TargetFramework>
-            <RuleSet>$(DirSrc)\codeanalysis.base.ruleset</RuleSet>
         </FxCopFiles>
-        <FxCopFiles Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.VbNet.Library.dll">
+        <FxCopFiles
+            Condition=" '$(DirBuildBinPlatformConfig)' != '' "
+            Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.*.exe">
+            <CustomDictionary>$(FxCopCustomDictionary)</CustomDictionary>
+            <RuleSet>$(DirSrc)\codeanalysis.base.ruleset</RuleSet>
+            <TargetFramework>4.5</TargetFramework>
+        </FxCopFiles>
+        <FxCopFiles
+            Condition=" '$(DirBuildBinPlatformConfig)' != '' "
+            Include="$(DirBuildBinPlatformConfig)\nBuildKit.Test.VbNet.Library.dll">
+            <CustomDictionary>$(FxCopCustomDictionary)</CustomDictionary>
+            <RuleSet>$(DirSrc)\codeanalysis.base.ruleset</RuleSet>
             <TargetFramework>3.5</TargetFramework>
-            <RuleSet>$(DirSrc)\codeanalysis.base.ruleset</RuleSet>
         </FxCopFiles>
 
     </ItemGroup>
@@ -981,7 +998,8 @@
         <!--
             The full path to the Visual Studio installation directory
         -->
-        <!-- <ToolsExternalVisualStudioDir Condition="Exists('C:\Program Files (x86)\Microsoft Visual Studio 14.0')">C:\Program Files (x86)\Microsoft Visual Studio 14.0</ToolsExternalVisualStudioDir>
+        <!-- <ToolsExternalVisualStudioDir Condition=" '$(ToolsExternalVisualStudioDir)' == '' AND Exists('C:\Program Files (x86)\Microsoft Visual Studio 15.0')">C:\Program Files (x86)\Microsoft Visual Studio 15.0</ToolsExternalVisualStudioDir>
+        <ToolsExternalVisualStudioDir Condition="Exists('C:\Program Files (x86)\Microsoft Visual Studio 14.0')">C:\Program Files (x86)\Microsoft Visual Studio 14.0</ToolsExternalVisualStudioDir>
         <ToolsExternalVisualStudioDir Condition="Exists('C:\Program Files (x86)\Microsoft Visual Studio 12.0')">C:\Program Files (x86)\Microsoft Visual Studio 12.0</ToolsExternalVisualStudioDir>
         <ToolsExternalVisualStudioDir Condition="AND Exists('C:\Program Files (x86)\Microsoft Visual Studio 11.0')">C:\Program Files (x86)\Microsoft Visual Studio 11.0</ToolsExternalVisualStudioDir> -->
         <!--

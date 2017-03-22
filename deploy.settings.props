@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="11.0"
-         DefaultTargets="Run"
-         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project
+    DefaultTargets="Run"
+    ToolsVersion="14.0"
+    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <!-- Indicate if an error in the pre-step actions should fail the deploy -->
         <!-- <FailDeployOnPreStepFailure>false</FailDeployOnPreStepFailure> -->
@@ -117,7 +118,8 @@
                                              - The GitHubFlowVersion tool (https://github.com/JakeGinnivan/GitHubFlowVersion)
         $(DeployStepsPrepareTagVcs)        - Tags the current commit with the version number. Currently supported version control systems are TFS and GIT.
         $(DeployStepsPrepareGetIssueIds)   - Gets the issue IDs from the commits on the current branch and stores them in a temp file for later use.
-        $(DeployStepsPrepareCopyFiles)     - Copies one or more files from the file system or from a NuGet package.
+        $(DeployStepsPrepareCopyNuGet)     - Copies one or more files from a NuGet package.
+        $(DeployStepsPrepareCopyFiles)     - Copies one or more files from the file system.
         $(DeployStepsPushToTags)           - Pushes the tags to a remote git repository
         $(DeployStepsPushToNuget)          - Pushes one or more artifacts to a NuGet feed
         $(DeployStepsPushToDirectory)      - Pushes one or more artifacts to a directory
@@ -131,13 +133,7 @@
         for that step, e.g. adding a deploy step that points to the 'c:\stuff\MyCoolScript.msbuild' will execute
         that script.
 
-        Each script has the following properties passed to it:
-        $(ShouldDisplayDebugLog)          - A flag indicating whether or not to display debug log information, usually at the start of the script execution.
-        $(NBuildKitVersion)               - The full version of the nBuildKit library that is executing the build.
-        $(DirNBuildKitMsBuild)            - The full path to the directory that contains the nBuildKit scripts.
-        $(DirNBuildKitMsBuildShared)      - The full path to the directory that contains the shared nBuildkit scripts.
-        $(DirNBuildKitMsBuildExtensions)  - The full path to the directory that contains the nBuildKit extension scripts.
-        $(DirNBuildKitMsBuildTemplates)   - The full path to the directory that contains the nBuildKit templates.
+        Any properties defined by the 'Properties' section are pushed up.
     -->
     <ItemGroup>
         <!--
@@ -242,6 +238,18 @@
         </DeployStepsToExecute>
         -->
 
+        <DeployStepsToExecute Include="$(DeployStepsPrepareCopyNuGet)">
+            <Properties>
+            </Properties>
+            <Groups>
+                CopyFiles;
+                Prepare;
+            </Groups>
+            <PreSteps>
+            </PreSteps>
+            <PostSteps>
+            </PostSteps>
+        </DeployStepsToExecute>
         <DeployStepsToExecute Include="$(DeployStepsPrepareCopyFiles)">
             <Properties>
             </Properties>
@@ -368,15 +376,7 @@
         for that step, e.g. adding a deploy step that points to the 'c:\stuff\MyCoolScript.msbuild' will execute
         that script.
 
-        Each script has the following properties passed to it:
-        $(ShouldDisplayDebugLog)         - A flag indicating whether or not to display debug log information, usually at the start of the script execution.
-        $(NBuildKitVersion)              - The full version of the nBuildKit library that is executing the build.
-        $(DirNBuildKitMsBuild)           - The full path to the directory that contains the nBuildKit scripts.
-        $(DirNBuildKitMsBuildShared)     - The full path to the directory that contains the shared nBuildkit scripts.
-        $(DirNBuildKitMsBuildExtensions) - The full path to the directory that contains the nBuildKit extension scripts.
-        $(DirNBuildKitMsBuildTemplates)  - The full path to the directory that contains the nBuildKit templates.
-
-        Additionally any properties defined by the 'Properties' section are also pushed up.
+        Any properties defined by the 'Properties' section are pushed up.
     -->
     <ItemGroup>
         <!--
@@ -384,6 +384,24 @@
             <Properties>
             </Properties>
         </DeployFailureStepsToExecute>
+        -->
+    </ItemGroup>
+
+    <!--
+        The following item group stores metadata describing the custom deploy steps that are executed in the deploy process.
+        By providing this metadata it is possible for pre- and post-step actions to more clearly determine which step
+        they were attached to.
+    -->
+    <ItemGroup>
+        <!--
+        <AvailableStepMetadata Include="$([System.IO.Path]::GetFileName('$(DirWorkspace)\my.deploy.step.msbuild'))">
+            <Description>
+                The description for my cool deploy step
+            </Description>
+            <Id></Id>
+            <Name>My deploy step</Name>
+            <Path>$(DirWorkspace)\my.deploy.step.msbuild</Path>
+        </AvailableStepMetadata>
         -->
     </ItemGroup>
 
@@ -397,7 +415,7 @@
     <ItemGroup Condition=" '@(FilesToCopy)' == '' ">
         <!--
         <FilesToCopy Include="">
-            <Destinations></Destinations>
+            <Destination></Destination>
         </FilesToCopy>
         -->
     </ItemGroup>
@@ -450,8 +468,12 @@
         Allows build templates, e.g. $(DirBuildDeploy)\${VersionSemantic}\*.nupkg.
     -->
     <ItemGroup>
-        <!--<NuGetPackagesToPush Include="$(DirBuildDeploy)\*.nupkg"
-                             Exclude="$(DirBuildDeploy)\*.symbols.nupkg" />-->
+        <!--
+        <NuGetPackagesToPush
+            Condition=" '$(DirBuildDeploy)' != '' "
+            Include="$(DirBuildDeploy)\*.nupkg"
+            Exclude="$(DirBuildDeploy)\*.symbols.nupkg" />
+        -->
     </ItemGroup>
 
 
@@ -476,7 +498,11 @@
         <SymbolServerUncPath>$(SymbolServerPath)</SymbolServerUncPath>
     </PropertyGroup>
     <ItemGroup>
-        <!--<SymbolPackagesToPush Include="$(DirBuildDeploy)\*.symbols.nupkg" />-->
+        <!--
+        <SymbolPackagesToPush
+            Condition=" '$(DirBuildDeploy)' != '' "
+            Include="$(DirBuildDeploy)\*.symbols.nupkg" />
+        -->
     </ItemGroup>
 
 
@@ -488,7 +514,8 @@
         except for the Repository allow the use of build templates, e.g. $(DirBuildDeploy)\myarchive-${VersionSemantic}.zip
     -->
     <ItemGroup>
-        <!--<PushToGitHubReleaseSpecs Include="${VersionSemantic} - My release">
+        <!--
+        <PushToGitHubReleaseSpecs Include="${VersionSemantic} - My release">
              <Repository>MyCoolProject</Repository>
              <Description>${ReleaseNotes}</Description>
              <IncludedFiles>
@@ -496,7 +523,8 @@
              </IncludedFiles>
              <ExcludedFiles>
              </ExcludedFiles>
-        </PushToGitHubReleaseSpecs>-->
+        </PushToGitHubReleaseSpecs>
+        -->
     </ItemGroup>
 
 
@@ -509,7 +537,9 @@
     -->
     <ItemGroup>
         <!--
-        <PushToGitBranchSpecs Include="$(DirBuildDeploy)\myarchive-${VersionSemantic}.zip">
+        <PushToGitBranchSpecs
+            Condition=" '$(DirBuildDeploy)' != '' "
+            Include="$(DirBuildDeploy)\myarchive-${VersionSemantic}.zip">
              <Repository>$(GitRemoteRepository)</Repository>
              <Branch>master</Branch>
              <ExtractZipFiles>true</ExtractZipFiles>
@@ -528,7 +558,9 @@
     -->
     <ItemGroup Condition=" '@(PushToGitRepositorySpecs)' == '' ">
         <!--
-        <PushToGitRepositorySpecs Include="$(DirBuildDeploy)\myarchive-${VersionSemantic}.zip">
+        <PushToGitRepositorySpecs
+            Condition=" '$(DirBuildDeploy)' != '' "
+            Include="$(DirBuildDeploy)\myarchive-${VersionSemantic}.zip">
              <Repository>$(GitRemoteRepository)</Repository>
         </PushToGitRepositorySpecs>
         -->

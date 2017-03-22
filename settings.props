@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="11.0"
-         DefaultTargets="Run"
-         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project
+    DefaultTargets="Run"
+    ToolsVersion="14.0"
+    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!--
         Certain properties and items in this settings file allow replacement of the following templates:
         ${VersionMajor}            - The major version number
@@ -40,6 +41,7 @@
         ${ProductNameInFilePath}   - The product name written in a way that it can be used in the file path
         ${ProductDescription}      - The (short) description of the product
         ${ProductNamespace}        - The namespace in which all the code for the product is placed
+        ${ProductUrl}              - The URL of the product website
         ${ProductStartingYear}     - The year the current product was created / released.
 
         ${CompanyName}             - The name of the company
@@ -71,9 +73,6 @@
 
     <!-- Overrides for the global properties -->
     <PropertyGroup>
-        <!-- A flag indicating whether or not to display debug log information, usually at the start of the script execution. -->
-        <!--<ShouldDisplayDebugLog>true</ShouldDisplayDebugLog>-->
-
         <!--
             A flag that indicates whether or not the workspace should be cleaned before the build is started. If set to
             true then the 'DirBuild' directory will be removed as well as all known generated files.
@@ -128,6 +127,12 @@
             * Generated code files that contain namespaces
         -->
         <ProductNamespace>NBuildKit.Test.VbNet</ProductNamespace>
+
+        <!--
+            The URL of the product website. This is for instance used for:
+            * nuspec files
+        -->
+        <ProductUrl>UNDEFINED</ProductUrl>
 
         <!--
             The first year the product was available / created. This is for instance used for:
@@ -403,13 +408,13 @@
         Any failure during the branching process will stop the build process.
     -->
     <ItemGroup Condition=" '@(BranchMergeTarget)' == '' ">
-        <!-- GITFLOW: If the input branch (BranchGitExpected) is a feature branch then we merge to develop -->
+        <!-- GITFLOW: If the input branch (GitBranchExpected) is a feature branch then we merge to develop -->
         <!--
         <BranchMergeTarget Include="develop"
                            Condition=" '$(IsGitFlow)' == 'true' AND '$(IsFeatureBranch)' == 'true' " />
         -->
 
-        <!-- GITFLOW: If the input branch (BranchGitExpected) is a release branch then we merge to develop and master -->
+        <!-- GITFLOW: If the input branch (GitBranchExpected) is a release branch then we merge to develop and master -->
         <!--
         <BranchMergeTarget Include="develop"
                            Condition=" '$(IsGitFlow)' == 'true' AND '$(IsReleaseBranch)' == 'true' " />
@@ -417,7 +422,7 @@
                            Condition=" '$(IsGitFlow)' == 'true' AND '$(IsReleaseBranch)' == 'true' " />
         -->
 
-        <!-- GITFLOW: If the input branch (BranchGitExpected) is a hotfix branch then we merge to develop and master -->
+        <!-- GITFLOW: If the input branch (GitBranchExpected) is a hotfix branch then we merge to develop and master -->
         <!--
         <BranchMergeTarget Include="develop"
                            Condition=" '$(IsGitFlow)' == 'true' AND '$(IsHotfixBranch)' == 'true' " />
@@ -436,7 +441,7 @@
             to have the following structure:
 
             <?xml version="1.0" encoding="utf-8"?>
-            <Project ToolsVersion="11.0"
+            <Project ToolsVersion="14.0"
                      DefaultTargets="Build"
                      xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
                 <PropertyGroup>
@@ -724,7 +729,7 @@
         NuGet if no package is specified in the packages.config file.
     -->
     <PropertyGroup>
-        <NBuildKitMinimumVersion Condition=" '$(NBuildKitMinimumVersion)' == '' ">${VersionNBuildKitOldestSupported}</NBuildKitMinimumVersion>
-        <NBuildKitMaximumVersion Condition=" '$(NBuildKitMaximumVersion)' == '' ">${VersionMajorNext}.0.0</NBuildKitMaximumVersion>
+        <PackageMinimumVersion Condition=" '$(PackageMinimumVersion)' == '' ">0.9.0</PackageMinimumVersion>
+        <PackageMaximumVersion Condition=" '$(PackageMaximumVersion)' == '' ">0.10.0</PackageMaximumVersion>
     </PropertyGroup>
 </Project>

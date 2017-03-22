@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="11.0"
-         DefaultTargets="Run"
-         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project
+    DefaultTargets="Run"
+    ToolsVersion="14.0"
+    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!--
         **** BOOTSTRAP - BUILD TASKS ****
     -->
@@ -11,7 +12,9 @@
     -->
     <ItemGroup>
         <!--
-        <MsBuildTasksProjectsToBuild Include="$(DirSrc)\MyTasks.Tasks.csproj">
+        <MsBuildTasksProjectsToBuild
+            Condition=" '$(DirSrc)' != '' "
+            Include="$(DirSrc)\MyTasks.Tasks.csproj">
             <Configuration>$(ProductionConfiguration)</Configuration>
             <Platform>$(Platform)</Platform>
             <Targets>Rebuild</Targets>
@@ -32,11 +35,17 @@
         The collection that contains all the assembly files that contain custom MsBuild Task definitions.
     -->
     <ItemGroup>
-        <!-- <ExtensionAssemblies Include="$(DirBuildBootstrap)\*.Tasks.dll" /> -->
+        <!--
+        <ExtensionAssemblies
+            Condition=" '$(DirSrc)' != '' "
+            Include="$(DirBuildBootstrap)\*.Tasks.dll">
+            <ExistsProperty>MyPropertyName</ExistsProperty>
+        </ExtensionAssemblies>
+         -->
     </ItemGroup>
 
 
-<!--
+    <!--
         **** PREPARE - VERSIONING ****
     -->
     <PropertyGroup>
@@ -52,8 +61,7 @@
     -->
     <PropertyGroup>
         <!-- The full path to the file that is used to store the issue IDs for the current branch -->
-        <!-- <FileIssueIds Condition=" '$(FileIssueIds)' == '' ">$(DirBuildTemp)\issue_ids.json</FileIssueIds> -->
-
+        <!-- <FileIssueIds>$(DirBuildTemp)\issue_ids.json</FileIssueIds> -->
         <!-- The full path to the text file that is used to store the release notes for the current release during the build. -->
         <!-- <FileReleaseNotes>$(DirBuildTemp)\releasenotes.txt</FileReleaseNotes> -->
     </PropertyGroup>
@@ -73,7 +81,7 @@
     -->
     <!-- Additional generated files -->
     <PropertyGroup>
-         <!-- <FileGeneratedLicenses>$(DirBuildTemp)\licenses.xml</FileGeneratedLicenses> -->
+        <!-- <FileGeneratedLicenses>$(DirBuildTemp)\licenses.xml</FileGeneratedLicenses> -->
     </PropertyGroup>
 
 
@@ -129,8 +137,10 @@
     -->
     <ItemGroup>
         <!--
-        <ArchivePackageSpecs Include="$(DirWorkspace)\**\*.zipspec"
-                             Exclude="$(DirBuild)\**\*.zipspec" />
+        <ArchivePackageSpecs
+            Condition=" '$(DirWorkspace)' != '' "
+            Include="$(DirWorkspace)\**\*.zipspec"
+            Exclude="$(DirBuild)\**\*.zipspec" />
         -->
     </ItemGroup>
 
