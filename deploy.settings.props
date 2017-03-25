@@ -179,7 +179,6 @@
             The following steps need to be executed on the original branch (i.e. the branch we are interested in
             building.
         -->
-        <!--
         <DeployStepsToExecute Include="$(DeployStepsPrepareVcsBranch)">
             <Properties>
             </Properties>
@@ -191,7 +190,6 @@
             <PostSteps>
             </PostSteps>
         </DeployStepsToExecute>
-        -->
         <DeployStepsToExecute Include="$(DeployStepsPrepareGetIssueIds)">
             <Properties>
             </Properties>
@@ -208,7 +206,6 @@
             All steps from here on may be executed on a different branch than the orginal branch we we started the
             build on because we might have done some merging / restoring from a different repository.
         -->
-        <!--
         <DeployStepsToExecute Include="$(DeployStepsPrepareGetVersion)">
             <Properties>
             </Properties>
@@ -220,7 +217,7 @@
             <PostSteps>
             </PostSteps>
         </DeployStepsToExecute>
-        -->
+
         <!--
         <DeployStepsToExecute Include="$(DeployStepsPrepareTagVcs)">
             <Properties>

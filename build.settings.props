@@ -226,7 +226,6 @@
             The following steps need to be executed on the original branch (i.e. the branch we are interested in
             building.
         -->
-        <!--
         <BuildStepsToExecute Include="$(BuildStepsPrepareVcsBranch)">
             <Properties>
             </Properties>
@@ -260,14 +259,12 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        -->
 
         <!--
             This step potentially changes the local branch we are building. If one or more merge targets have been
             specified then this step will merge to all merge targets and leave the current branch as the last branch
             we merged to.
         -->
-        <!--
         <BuildStepsToExecute Include="$(BuildStepsPrepareVcsMerge)">
             <Properties>
             </Properties>
@@ -279,7 +276,6 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        -->
 
         <!--
             All steps from here on may be executed on a different branch than the orginal branch we we started the
@@ -296,7 +292,6 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        <!--
         <BuildStepsToExecute
             Condition=" '$(IsGitFlow)' == 'true' AND ('$(IsReleaseBranch)' == 'true' OR '$(IsHotfixBranch)' == 'true') "
             Include="$(BuildStepsPrepareTagVcs)">
@@ -310,7 +305,6 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        -->
 
         <!--
         <BuildStepsToExecute Include="$(BuildStepsPrepareReleaseNotes)">
